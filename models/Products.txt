@@ -1,0 +1,135 @@
+/*const options = { discriminatorKey: 'kind', collection: 'products' }*/
+
+const reviewSchema = mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    rating: { type: String, required: true },
+    comment: { type: String, required: true },
+  },
+  {
+    timestamps: true,
+  }
+)
+
+const fabricSchema = new mongoose.Schema(
+  {
+    fabricId: { type: String, required: true },
+    fabricImage: { type: String },
+    itemImage: {
+      type: String,
+    },
+    availableSizes: {
+      type: Object,
+      required: true,
+    },
+  },
+  { discriminatorKey: 'kind' }
+)
+
+const productSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'User',
+  },
+  sku: {
+    type: String,
+    required: true,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  image: {
+    type: String,
+    required: true,
+  },
+  category: {
+    type: String,
+    required: true,
+  },
+  fabricType: {
+    type: String,
+    required: true,
+  },
+  details: {
+    type: String,
+    required: true,
+  },
+  price: {
+    type: Number,
+    required: true,
+  },
+  wholesalePrice: {
+    type: Number,
+    required: true,
+  },
+  onSale: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+  salePrice: {
+    type: Number,
+  },
+  reviews: [reviewSchema],
+  rating: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+  numReviews: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+  fabrics: [fabricSchema],
+})
+
+const fabricSizes = productSchema.path('fabrics')
+
+const Product = mongoose.model('Product', productSchema)
+
+// sub schemas
+
+const standardSchema = new mongoose.Schema({
+  availableSizes: {
+    xs: { type: Number, required: true, default: 0 },
+    s: { type: Number, required: true, default: 0 },
+    m: { type: Number, required: true, default: 0 },
+    l: { type: Number, required: true, default: 0 },
+    xl: { type: Number, required: true, default: 0 },
+  },
+})
+
+const plusSizeSchema = new mongoose.Schema({
+  availableSizes: {
+    oneX: { type: Number, required: true, default: 0 },
+    twoX: { type: Number, required: true, default: 0 },
+  },
+})
+
+const accessorySchema = new mongoose.Schema({
+  availableSizes: {
+    os: { type: Number, required: true, default: 0 },
+  },
+})
+
+// discriminators
+
+const standardProduct = fabricSizes.discriminator(
+  'standardProduct',
+  standardSchema
+)
+
+const plusSizeProduct = fabricSizes.discriminator(
+  'plusSizeProduct',
+  plusSizeSchema
+)
+
+const accessoryProduct = fabricSizes.discriminator(
+  'accessoryProduct',
+  accessorySchema
+)
+
+export { Product, standardProduct, plusSizeProduct, accessoryProduct }
